@@ -5,6 +5,15 @@ import { AppError } from "../graph/errors";
 import type { AppConfig } from "../config";
 import type { Logger } from "../lib/logger";
 
+/** The bits of MSAL's device-code response we surface (a subset of `DeviceCodeResponse`). */
+export interface DeviceCodeInfo {
+  userCode: string;
+  verificationUri: string;
+  message: string;
+  /** Seconds until the code expires. */
+  expiresIn: number;
+}
+
 export function createPca(config: AppConfig, logger: Logger): PublicClientApplication {
   if (!config.clientId) {
     throw new AppError(
@@ -27,16 +36,17 @@ export function createPca(config: AppConfig, logger: Logger): PublicClientApplic
   });
 }
 
-/** Runs the device-code flow interactively. Only ever called from the `login` CLI command. */
-export async function loginInteractive(pca: PublicClientApplication, scopes: string[]): Promise<AuthenticationResult> {
-  const result = await pca.acquireTokenByDeviceCode({
-    scopes,
-    deviceCodeCallback: (response) => {
-      // `response.message` is the human instruction ("open https://microsoft.com/devicelogin and enter CODE").
-      process.stdout.write(`\n${response.message}\n\n`);
-    },
-  });
-  if (!result) throw new AppError("auth_required", "Device-code login did not return a token.");
+/**
+ * Run the device-code flow. `onDeviceCode` fires once, early, with the code/URL/message;
+ * the returned promise then polls until the user completes the sign-in (or it times out).
+ */
+export async function acquireByDeviceCode(
+  pca: PublicClientApplication,
+  scopes: string[],
+  onDeviceCode: (info: DeviceCodeInfo) => void,
+): Promise<AuthenticationResult> {
+  const result = await pca.acquireTokenByDeviceCode({ scopes, deviceCodeCallback: onDeviceCode });
+  if (!result) throw new AppError("auth_required", "Device-code sign-in did not return a token.");
   return result;
 }
 

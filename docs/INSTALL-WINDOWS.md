@@ -14,7 +14,7 @@ The standard way to run `microsoft-todo-mcp` is via `npx` (it's on npm) — no s
    ```powershell
    npx -y microsoft-todo-mcp login
    ```
-   The first run downloads the package (~5–10s); after that npx caches it. It then prints something like *"To sign in, use a web browser to open https://microsoft.com/devicelogin and enter the code ABCD-EFGH"*. Open that URL, sign in with your Microsoft account, enter the code, and approve the consent — it shows as **"Microsoft Graph Command Line Tools — Read and write your tasks"** (Microsoft's well-known tool client; the issued token is still limited to `Tasks.ReadWrite`). On success: *"Signed in as …"*. The token is cached at `C:\Users\<you>\.config\microsoft-todo-mcp\token-cache.json`.
+   The first run downloads the package (~5–10s); after that npx caches it. It then prints something like *"To sign in, use a web browser to open https://microsoft.com/devicelogin and enter the code ABCD-EFGH"*. Open that URL, sign in with your Microsoft account, enter the code, and approve the consent — it shows as **"Microsoft Graph Command Line Tools — Read and write your tasks"** (Microsoft's well-known tool client; the issued token is still limited to `Tasks.ReadWrite`). On success: *"Signed in as …"*. The token is cached at `C:\Users\<you>\.config\microsoft-todo-mcp\token-cache.json`. *(You can also skip this and sign in from inside Claude Desktop later — after steps 2–4, ask Claude "sign me in to Microsoft To Do" and it'll give you the same code to enter; no terminal needed. Doing it here first just warms the npx cache so Claude Desktop starts faster.)*
 
 2. **Configure Claude Desktop** — edit `%APPDATA%\Claude\claude_desktop_config.json` (press Win+R, type `%APPDATA%\Claude`, open `claude_desktop_config.json` in a text editor; create the file/folder if missing). Add the `microsoft-todo` entry — **if there's already an `mcpServers` block, merge into it, don't replace it:**
    ```json
@@ -37,7 +37,7 @@ The standard way to run `microsoft-todo-mcp` is via `npx` (it's on npm) — no s
 
 3. **Restart Claude Desktop** — fully quit it (right-click the tray icon → **Quit** — closing the window isn't enough) and reopen.
 
-4. **Test** — ask Claude *"list my Microsoft To Do lists"* or *"add a task"*. (15 tools: task lists, tasks, checklist items.)
+4. **Test** — ask Claude *"list my Microsoft To Do lists"* or *"add a task"* (or, if you haven't signed in yet, *"sign me in to Microsoft To Do"*). 16 tools: sign-in, task lists, tasks, checklist items.
 
 > Doing `login` (step 1) first warms the npx cache, so Claude Desktop starts the server quickly. To run an unpublished commit instead of the npm release, use `github:fabienbutz/microsoft-todo-mcp` as the spec (npx then clones + builds it — slower first run). For a local checkout, see Option B.
 

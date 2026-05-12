@@ -34,19 +34,16 @@ By default the app identity shown on the Microsoft sign-in / consent screen is *
    claude mcp add microsoft-todo -- npx -y microsoft-todo-mcp
    ```
 
-2. **Sign in once** (device-code flow):
-   ```bash
-   npx -y microsoft-todo-mcp login
-   ```
-   Open the URL it prints, enter the code, approve the consent ("Microsoft Graph Command Line Tools"). The token is cached; the server reuses it (and refreshes it silently).
+2. **Restart your MCP client.** The `microsoft-todo` tools are now available.
 
-3. **Restart your MCP client.** The `microsoft-todo` tools are now available.
+3. **Sign in.** Ask Claude — *"sign me in to Microsoft To Do"* — or just use any tool: the server gives you a short code, you open <https://microsoft.com/devicelogin> in a browser, enter it, and approve the consent ("Microsoft Graph Command Line Tools"). The token is cached afterwards and refreshed silently. *(Prefer a terminal? `npx -y microsoft-todo-mcp login` does the same — and warms the npx cache while it's at it.)*
 
 ## Tools
 
 | Tool | Risk | Description |
 | --- | --- | --- |
-| `auth_status` | read | Current sign-in state (account, token expiry). No Graph call. |
+| `auth_status` | read | Current sign-in state (account, token expiry, any pending sign-in). No Graph call. |
+| `sign_in` | read | Start a device-code sign-in; returns a code + URL to enter, completes in the background. |
 | `list_task_lists` | read | List all task lists. |
 | `create_task_list` | write | Create a list. |
 | `update_task_list` | write | Rename a list. |

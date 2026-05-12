@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { allTools } from "../src/tools/registry";
 
 describe("tool registry", () => {
-  it("exposes the v0.1 tool surface", () => {
-    expect(allTools).toHaveLength(15);
+  it("exposes the expected tool surface", () => {
+    expect(allTools).toHaveLength(16);
   });
 
   it("has unique tool names", () => {

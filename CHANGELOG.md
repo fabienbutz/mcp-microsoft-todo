@@ -4,6 +4,15 @@ Notable changes to this project. Format loosely based on [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-12
+
+### Added
+- `sign_in` tool + inline device-code sign-in: a tool call that needs a token (or the `sign_in`
+  tool) returns a short code to enter at <https://microsoft.com/devicelogin> and completes the
+  sign-in in the background — no terminal needed. The `login` CLI command still works for a
+  terminal-first setup. A failed silent refresh now also falls back to a device-code sign-in.
+- `auth_status` reports any pending device-code sign-in.
+
 ## [0.1.0] - 2026-05-12
 
 Initial release. Published on npm as `microsoft-todo-mcp` — run it with `npx -y microsoft-todo-mcp`

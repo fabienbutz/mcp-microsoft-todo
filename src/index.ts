@@ -1,7 +1,7 @@
 import { loadConfig, scopesFor } from "./config";
 import { createLogger } from "./lib/logger";
 import { runServer } from "./server";
-import { createPca, getCachedAccount, loginInteractive } from "./auth/device-code";
+import { acquireByDeviceCode, createPca, getCachedAccount } from "./auth/device-code";
 import { clearCache } from "./auth/token-cache";
 import { toAppError } from "./graph/errors";
 import { VERSION } from "./version";
@@ -73,7 +73,9 @@ async function main(): Promise<void> {
       return;
 
     case "login": {
-      const result = await loginInteractive(createPca(config, logger), scopesFor(config));
+      const result = await acquireByDeviceCode(createPca(config, logger), scopesFor(config), (info) => {
+        process.stdout.write(`\n${info.message}\n\n`);
+      });
       process.stdout.write(`Signed in as ${result.account?.username ?? "an unknown account"}.\n`);
       return;
     }

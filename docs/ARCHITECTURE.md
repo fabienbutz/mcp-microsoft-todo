@@ -86,7 +86,7 @@ uninitialized ──init w/ cached account──▶ token_expired ──silent r
 
 ## 5. Tools
 
-15 tools, one shape (`_shared.ts`: validated args → `todo/*` → `okResult(JSON)`; thrown `AppError` → `errorResult` with `isError: true`). See the table in the README. Risk class is declared on each tool and used by `server.ts` to honour `--readonly` / `--no-destructive`. `create_*` tools go through `withIdempotency`.
+16 tools, one shape (`_shared.ts`: validated args → `todo/*` → `okResult(JSON)`; thrown `AppError` → `errorResult` with `isError: true`). See the table in the README. Risk class is declared on each tool and used by `server.ts` to honour `--readonly` / `--no-destructive`. `create_*` tools go through `withIdempotency`.
 
 ## 6. Idempotency
 
