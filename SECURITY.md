@@ -8,7 +8,7 @@ Please **don't** open a public issue for security problems. Instead, open a priv
 ## What this tool touches
 
 - Authenticates to Microsoft Graph as **you** via delegated auth (device-code flow), with the **`Tasks.ReadWrite`** scope only — your To Do lists, tasks, and checklist items. Nothing else (no mail, files, calendar). Running with `--scope-readonly` narrows that to `Tasks.Read`.
-- Caches the MSAL token (which contains a **refresh token**) at `~/.config/mcp-microsoft-todo/token-cache.json` with `0600` permissions. Treat that file like an SSH private key. `mcp-microsoft-todo logout` deletes it.
+- Caches the MSAL token (which contains a **refresh token**) at `~/.config/microsoft-todo-mcp/token-cache.json` with `0600` permissions. Treat that file like an SSH private key. `microsoft-todo-mcp logout` deletes it.
 - Uses a **public client** — there is no client secret anywhere in this project or its config. By default the client id is Microsoft's well-known *Microsoft Graph CLI* public client (so the consent screen reads "Microsoft Graph Command Line Tools"); set `MS_TODO_CLIENT_ID` to use your own Entra app. A public-client id is not sensitive.
 - Sends **no telemetry** and makes no network calls other than to Microsoft Graph and (during `login`) the Microsoft identity platform. Logs are written to stderr on your machine and nowhere else; token-like values are redacted from logs and error output.
 

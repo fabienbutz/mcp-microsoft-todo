@@ -75,7 +75,7 @@ export class AuthManager implements TokenProvider {
     }
     if (!this.account) {
       this.state = "uninitialized";
-      throw new AppError("auth_required", "Not signed in. Run `mcp-microsoft-todo login` first.");
+      throw new AppError("auth_required", "Not signed in. Run `microsoft-todo-mcp login` first.");
     }
     // Single-flight: concurrent tool calls share one silent refresh.
     if (this.refreshing) return this.refreshing;
@@ -94,7 +94,7 @@ export class AuthManager implements TokenProvider {
     } catch (err) {
       this.state = "refresh_failed";
       this.logger.warn("silent token refresh failed", { error: (err as Error).message });
-      throw new AppError("auth_expired", "Session expired and could not be refreshed. Run `mcp-microsoft-todo login` again.");
+      throw new AppError("auth_expired", "Session expired and could not be refreshed. Run `microsoft-todo-mcp login` again.");
     }
   }
 

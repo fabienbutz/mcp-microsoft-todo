@@ -34,7 +34,7 @@ src/
 
   auth/
     device-code.ts   MSAL PublicClientApplication + device-code login
-    token-cache.ts   ICachePlugin → file at ~/.config/mcp-microsoft-todo/ (0600)
+    token-cache.ts   ICachePlugin → file at ~/.config/microsoft-todo-mcp/ (0600)
     auth-state.ts    AuthManager — the explicit auth state machine + TokenProvider
   graph/
     client.ts        fetch + Bearer + client-request-id + retry/throttle + error mapping
@@ -71,7 +71,7 @@ uninitialized ──init w/ cached account──▶ token_expired ──silent r
       └────────── no cached account ────────────┴──────── refresh fails ────────────┘ (refresh_failed)
 ```
 
-- **Login** is a separate CLI command (`mcp-microsoft-todo login`) using the device-code flow — never raced inside a tool call. Public client → **no client secret anywhere**. In `serve`, a tool call that needs a token but can't get one returns a structured `auth_required` / `auth_expired` error telling the user to run `login`; the server never pops a device-code prompt on its own.
+- **Login** is a separate CLI command (`microsoft-todo-mcp login`) using the device-code flow — never raced inside a tool call. Public client → **no client secret anywhere**. In `serve`, a tool call that needs a token but can't get one returns a structured `auth_required` / `auth_expired` error telling the user to run `login`; the server never pops a device-code prompt on its own.
 - **Scopes:** `Tasks.ReadWrite` by default; `--scope-readonly` requests only `Tasks.Read` (a genuinely read-only token, not just a runtime gate). `offline_access` is added by MSAL for the refresh token.
 - **Token cache:** MSAL `ICachePlugin` → JSON file with `0600` perms (`MS_TODO_TOKEN_CACHE` to relocate). Refresh token = the sensitive artifact; treat the file like an SSH key. (OS-keychain storage via `keytar` is a deliberate non-default — native-dependency friction, especially on Linux/CI; planned as opt-in for v0.3.)
 - **Accounts:** the default client id is Microsoft's well-known *Graph CLI* public client (multi-tenant + personal Microsoft accounts), authority `…/common`; `MS_TODO_CLIENT_ID` swaps in your own registration. Personal `@outlook.com` To Do works.
@@ -102,7 +102,7 @@ uninitialized ──init w/ cached account──▶ token_expired ──silent r
 
 ## 9. Security posture
 
-No client secret (public client). Token cache `0600`, refresh token treated like an SSH key. Minimal scopes (`Tasks.ReadWrite` — your own tasks, nothing else); `--readonly` is a UX/defense-in-depth runtime guard, `--scope-readonly` is the real boundary (`Tasks.Read` token). No telemetry. Token redaction in all logs/errors. Dependency minimalism: runtime deps are just `@modelcontextprotocol/sdk`, `@azure/msal-node`, `zod` (HTTP via native `fetch`, logging hand-rolled). Distributed from GitHub via `npx github:fabienbutz/mcp-microsoft-todo` (a `prepare` script builds `dist/` on install) — not published to the npm registry. Disclosure process: see [`../SECURITY.md`](../SECURITY.md).
+No client secret (public client). Token cache `0600`, refresh token treated like an SSH key. Minimal scopes (`Tasks.ReadWrite` — your own tasks, nothing else); `--readonly` is a UX/defense-in-depth runtime guard, `--scope-readonly` is the real boundary (`Tasks.Read` token). No telemetry. Token redaction in all logs/errors. Dependency minimalism: runtime deps are just `@modelcontextprotocol/sdk`, `@azure/msal-node`, `zod` (HTTP via native `fetch`, logging hand-rolled). Published on npm as `microsoft-todo-mcp` (`npx -y microsoft-todo-mcp`); also runnable from a GitHub checkout via the `prepare` build (`npx -y github:fabienbutz/microsoft-todo-mcp`). Disclosure process: see [`../SECURITY.md`](../SECURITY.md).
 
 ## 10. Config & CLI
 
@@ -114,7 +114,7 @@ Env: `MS_TODO_CLIENT_ID`, `MS_TODO_AUTHORITY`, `MS_TODO_TOKEN_CACHE`, `MS_TODO_R
 
 ## 12. CI/CD & packaging
 
-`.github/workflows/ci.yml`: on push/PR → `npm ci → typecheck → lint → test → build` on Node 20 and 22. Build via `tsup` → ESM, shebang banner, single-file `dist/index.js`; `bin` → `mcp-microsoft-todo`. A `prepare` script (`npm run build`) builds `dist/` on `npm install`, so `npx -y github:fabienbutz/mcp-microsoft-todo` runs the server straight from the repo — distribution is via GitHub, not the npm registry (the `files` allowlist in `package.json` is harmless but unused). **Planned:** a generated `docs/TOOLS.md` with a CI drift check; a `version.ts` ↔ `package.json` sync check.
+`.github/workflows/ci.yml`: on push/PR → `npm ci → typecheck → lint → test → build` on Node 20 and 22. Build via `tsup` → ESM, shebang banner, single-file `dist/index.js`; `bin` → `microsoft-todo-mcp`. A `prepare` script (`npm run build`) builds `dist/` on `npm install`; `npm publish` packs the built `dist/` (the `files` allowlist limits the tarball to `dist`, `docs`, `README`, `LICENSE`). Published on npm as `microsoft-todo-mcp`; the `github:fabienbutz/microsoft-todo-mcp` spec also works (clone + `prepare` build) for running an unpublished commit. **Planned:** a generated `docs/TOOLS.md` with a CI drift check; a `version.ts` ↔ `package.json` sync check; release automation on `v*` tags.
 
 ## 13. Roadmap
 

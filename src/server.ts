@@ -37,7 +37,7 @@ export async function runServer(config: AppConfig = loadConfig()): Promise<void>
     idempotency: new IdempotencyCache(systemClock, IDEMPOTENCY_TTL_MS),
   };
 
-  const server = new McpServer({ name: "mcp-microsoft-todo", version: VERSION });
+  const server = new McpServer({ name: "microsoft-todo-mcp", version: VERSION });
 
   let registered = 0;
   let skipped = 0;
@@ -61,7 +61,7 @@ export async function runServer(config: AppConfig = loadConfig()): Promise<void>
     });
   }
 
-  logger.info("mcp-microsoft-todo starting", {
+  logger.info("microsoft-todo-mcp starting", {
     version: VERSION,
     registeredTools: registered,
     skippedTools: skipped,

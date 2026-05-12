@@ -72,7 +72,7 @@ export function mapGraphError(status: number, body: unknown, headers: Headers): 
 
   switch (status) {
     case 401:
-      return new AppError("auth_expired", "Microsoft rejected the access token (401). Run `mcp-microsoft-todo login` again.", base);
+      return new AppError("auth_expired", "Microsoft rejected the access token (401). Run `microsoft-todo-mcp login` again.", base);
     case 403:
       return new AppError("permission_denied", message, base);
     case 404:

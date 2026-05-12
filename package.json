@@ -1,17 +1,17 @@
 {
-  "name": "mcp-microsoft-todo",
+  "name": "microsoft-todo-mcp",
   "version": "0.1.0",
   "description": "Model Context Protocol server for Microsoft To Do (via Microsoft Graph).",
   "type": "module",
   "license": "MIT",
   "author": "Fabien Butz",
-  "homepage": "https://github.com/fabienbutz/mcp-microsoft-todo#readme",
+  "homepage": "https://github.com/fabienbutz/microsoft-todo-mcp#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fabienbutz/mcp-microsoft-todo.git"
+    "url": "git+https://github.com/fabienbutz/microsoft-todo-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/fabienbutz/mcp-microsoft-todo/issues"
+    "url": "https://github.com/fabienbutz/microsoft-todo-mcp/issues"
   },
   "keywords": [
     "mcp",
@@ -24,7 +24,7 @@
     "anthropic"
   ],
   "bin": {
-    "mcp-microsoft-todo": "dist/index.js"
+    "microsoft-todo-mcp": "dist/index.js"
   },
   "files": [
     "dist",

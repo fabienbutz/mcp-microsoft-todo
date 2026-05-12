@@ -34,7 +34,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   return {
     clientId: env.MS_TODO_CLIENT_ID ?? PUBLISHED_CLIENT_ID,
     authority: env.MS_TODO_AUTHORITY ?? "https://login.microsoftonline.com/common",
-    tokenCachePath: env.MS_TODO_TOKEN_CACHE ?? join(homedir(), ".config", "mcp-microsoft-todo", "token-cache.json"),
+    tokenCachePath: env.MS_TODO_TOKEN_CACHE ?? join(homedir(), ".config", "microsoft-todo-mcp", "token-cache.json"),
     scopeReadonly: envBool(env.MS_TODO_SCOPE_READONLY),
     readonly: envBool(env.MS_TODO_READONLY),
     noDestructive: envBool(env.MS_TODO_NO_DESTRUCTIVE),

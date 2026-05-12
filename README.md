@@ -1,14 +1,14 @@
-# mcp-microsoft-todo
+# microsoft-todo-mcp
 
-[![CI](https://github.com/fabienbutz/mcp-microsoft-todo/actions/workflows/ci.yml/badge.svg)](https://github.com/fabienbutz/mcp-microsoft-todo/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/microsoft-todo-mcp.svg)](https://www.npmjs.com/package/microsoft-todo-mcp) [![CI](https://github.com/fabienbutz/microsoft-todo-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/fabienbutz/microsoft-todo-mcp/actions/workflows/ci.yml)
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for **Microsoft To Do**, built on the Microsoft Graph API. Lets an MCP client (Claude Desktop, Claude Code, …) read and manage your To Do lists, tasks, and checklist items.
 
-> **Install.** Runs via `npx` straight from this repo — no separate install, just Node.js (`npx` ships with it). This project is distributed from GitHub, not the npm registry, so the package spec is `github:fabienbutz/mcp-microsoft-todo` everywhere below. Prefer a local checkout? See [build from source](docs/INSTALL-WINDOWS.md). By default it authenticates with the well-known **Microsoft Graph CLI** public client id — nothing to register, just `login` once; set `MS_TODO_CLIENT_ID` to use [your own Entra app](docs/ENTRA-APP-SETUP.md).
+> **Install.** Add it to your MCP client config (below) and run `npx -y microsoft-todo-mcp login` once. No separate install — `npx` ships with Node.js. By default it authenticates with the well-known **Microsoft Graph CLI** public client id, so there's nothing to register; set `MS_TODO_CLIENT_ID` to use [your own Entra app](docs/ENTRA-APP-SETUP.md) instead. (To run an unpublished commit, use `github:fabienbutz/microsoft-todo-mcp` as the spec instead of `microsoft-todo-mcp`.)
 
 ## What it can access
 
-Delegated Microsoft Graph scope `Tasks.ReadWrite` — **your own To Do lists and tasks, nothing else** (no mail, no files, no calendar). No telemetry, no phone-home: logs go to stderr on your machine and nowhere else. The refresh token is cached at `~/.config/mcp-microsoft-todo/token-cache.json` with `0600` permissions — treat it like an SSH key.
+Delegated Microsoft Graph scope `Tasks.ReadWrite` — **your own To Do lists and tasks, nothing else** (no mail, no files, no calendar). No telemetry, no phone-home: logs go to stderr on your machine and nowhere else. The refresh token is cached at `~/.config/microsoft-todo-mcp/token-cache.json` with `0600` permissions — treat it like an SSH key.
 
 By default the app identity shown on the Microsoft sign-in / consent screen is *Microsoft Graph Command Line Tools* (Microsoft's well-known public client); the token it issues is still limited to `Tasks.ReadWrite`. Set `MS_TODO_CLIENT_ID` if you'd rather it be your own named app.
 
@@ -22,23 +22,23 @@ By default the app identity shown on the Microsoft sign-in / consent screen is *
      "mcpServers": {
        "microsoft-todo": {
          "command": "npx",
-         "args": ["-y", "github:fabienbutz/mcp-microsoft-todo"]
+         "args": ["-y", "microsoft-todo-mcp"]
        }
      }
    }
    ```
-   To use your own Entra app, add `"env": { "MS_TODO_CLIENT_ID": "<your-app-client-id>" }`. On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd", "args": ["/c", "npx", "-y", "github:fabienbutz/mcp-microsoft-todo"]`.
+   To use your own Entra app, add `"env": { "MS_TODO_CLIENT_ID": "<your-app-client-id>" }`. On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd", "args": ["/c", "npx", "-y", "microsoft-todo-mcp"]` — see [`docs/INSTALL-WINDOWS.md`](docs/INSTALL-WINDOWS.md).
 
    Claude Code:
    ```bash
-   claude mcp add microsoft-todo -- npx -y github:fabienbutz/mcp-microsoft-todo
+   claude mcp add microsoft-todo -- npx -y microsoft-todo-mcp
    ```
 
 2. **Sign in once** (device-code flow):
    ```bash
-   npx -y github:fabienbutz/mcp-microsoft-todo login
+   npx -y microsoft-todo-mcp login
    ```
-   Open the URL it prints, enter the code, approve the consent ("Microsoft Graph Command Line Tools"). The token is cached; the server reuses it (and refreshes it silently). *(Running this once also warms the npx cache, so Claude Desktop starts the server quickly afterward.)*
+   Open the URL it prints, enter the code, approve the consent ("Microsoft Graph Command Line Tools"). The token is cached; the server reuses it (and refreshes it silently).
 
 3. **Restart your MCP client.** The `microsoft-todo` tools are now available.
 
@@ -72,13 +72,15 @@ Date-time inputs accept either an ISO-8601 string (`2026-05-20T17:00:00`, interp
 | `--no-destructive` / `MS_TODO_NO_DESTRUCTIVE=1` | Hides delete tools; writes still allowed. |
 | `--scope-readonly` / `MS_TODO_SCOPE_READONLY=1` | Requests only the `Tasks.Read` Graph scope (a real read-only token, not just a runtime guard — requires re-login). |
 
+Pass flags after the package spec, e.g. `"args": ["-y", "microsoft-todo-mcp", "--readonly"]`.
+
 ## Configuration
 
 | Env var | Default | Notes |
 | --- | --- | --- |
 | `MS_TODO_CLIENT_ID` | Microsoft Graph CLI well-known client id | Set to use your own Entra app registration (see [`docs/ENTRA-APP-SETUP.md`](docs/ENTRA-APP-SETUP.md)). |
 | `MS_TODO_AUTHORITY` | `https://login.microsoftonline.com/common` | Use `.../<tenant-id>` for a single-tenant app. |
-| `MS_TODO_TOKEN_CACHE` | `~/.config/mcp-microsoft-todo/token-cache.json` | Where the refresh token is stored (`0600`). |
+| `MS_TODO_TOKEN_CACHE` | `~/.config/microsoft-todo-mcp/token-cache.json` | Where the refresh token is stored (`0600`). |
 | `MS_TODO_MAX_RESULTS` | `200` | Soft cap on items returned by list tools (page-granular). |
 | `MS_TODO_GRAPH_BASE` | `https://graph.microsoft.com/v1.0` | Override for sovereign clouds / testing. |
 | `LOG_LEVEL` | `info` | `silent` \| `error` \| `warn` \| `info` \| `debug`. Logs are JSON on stderr. |
@@ -88,25 +90,26 @@ CLI flags take precedence over env vars.
 ## CLI
 
 ```
-mcp-microsoft-todo [serve]   start the MCP server on stdio (default)
-mcp-microsoft-todo login     sign in via device code
-mcp-microsoft-todo logout    clear the cached token
-mcp-microsoft-todo whoami    show the signed-in account
-mcp-microsoft-todo --version
+npx -y microsoft-todo-mcp [serve]   start the MCP server on stdio (default)
+npx -y microsoft-todo-mcp login     sign in via device code
+npx -y microsoft-todo-mcp logout    clear the cached token
+npx -y microsoft-todo-mcp whoami    show the signed-in account
+npx -y microsoft-todo-mcp --version
 ```
 
 ## Development
 
 ```bash
-npm install
-npm run build        # tsup → dist/index.js (with shebang)
+git clone https://github.com/fabienbutz/microsoft-todo-mcp.git
+cd microsoft-todo-mcp
+npm install          # also builds dist/ via the `prepare` script
 npm run typecheck
 npm run lint
 npm test             # vitest + fast-check
 node dist/index.js login   # then `node dist/index.js` to run the server
 ```
 
-Architecture and design rationale: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Contributing notes (incl. the manual end-to-end smoke test): [`CONTRIBUTING.md`](CONTRIBUTING.md). Security: [`SECURITY.md`](SECURITY.md).
+Architecture and design rationale: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Windows walkthrough: [`docs/INSTALL-WINDOWS.md`](docs/INSTALL-WINDOWS.md). Contributing (incl. the manual end-to-end smoke test): [`CONTRIBUTING.md`](CONTRIBUTING.md). Security: [`SECURITY.md`](SECURITY.md).
 
 ## License
 

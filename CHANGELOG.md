@@ -4,13 +4,15 @@ Notable changes to this project. Format loosely based on [Keep a Changelog](http
 
 ## [Unreleased]
 
-Initial scaffold. Distributed from GitHub — run with `npx -y github:fabienbutz/mcp-microsoft-todo`
-(a `prepare` script builds it on install); not published to the npm registry. Authenticates with
+## [0.1.0] - 2026-05-12
+
+Initial release. Published on npm as `microsoft-todo-mcp` — run it with `npx -y microsoft-todo-mcp`
+(also runnable from a GitHub checkout: `npx -y github:fabienbutz/microsoft-todo-mcp`). Authenticates with
 the well-known Microsoft Graph CLI public client id by default (overridable via `MS_TODO_CLIENT_ID`).
 
 ### Added
 - Device-code authentication (MSAL public client — no client secret), file token cache at
-  `~/.config/mcp-microsoft-todo/token-cache.json` (`0600`), explicit `AuthManager` state machine
+  `~/.config/microsoft-todo-mcp/token-cache.json` (`0600`), explicit `AuthManager` state machine
   with single-flight refresh; tolerates a missing or corrupt cache file.
 - Microsoft Graph HTTP client: per-call `client-request-id`, retry/throttle with full-jitter
   backoff (capped `Retry-After`), stable error taxonomy with request ids, `@odata.nextLink`

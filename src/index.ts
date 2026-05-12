@@ -30,15 +30,15 @@ function flagOverrides(flags: Set<string>): Record<string, string> {
   return overrides;
 }
 
-const HELP = `mcp-microsoft-todo ${VERSION}
+const HELP = `microsoft-todo-mcp ${VERSION}
 Model Context Protocol server for Microsoft To Do.
 
 Usage:
-  mcp-microsoft-todo [serve]      Start the MCP server on stdio (default)
-  mcp-microsoft-todo login        Sign in via device code (one time)
-  mcp-microsoft-todo logout       Clear the cached token
-  mcp-microsoft-todo whoami       Show the signed-in account
-  mcp-microsoft-todo --version    Print version
+  microsoft-todo-mcp [serve]      Start the MCP server on stdio (default)
+  microsoft-todo-mcp login        Sign in via device code (one time)
+  microsoft-todo-mcp logout       Clear the cached token
+  microsoft-todo-mcp whoami       Show the signed-in account
+  microsoft-todo-mcp --version    Print version
 
 Flags (serve):
   --readonly         Disable all write and destructive tools
@@ -86,7 +86,7 @@ async function main(): Promise<void> {
     case "whoami": {
       const account = await getCachedAccount(createPca(config, logger));
       if (!account) {
-        process.stdout.write("Not signed in. Run `mcp-microsoft-todo login`.\n");
+        process.stdout.write("Not signed in. Run `microsoft-todo-mcp login`.\n");
         return;
       }
       process.stdout.write(`${account.username}${account.name ? ` (${account.name})` : ""} — tenant ${account.tenantId}\n`);
