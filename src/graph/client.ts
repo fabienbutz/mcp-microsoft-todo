@@ -15,7 +15,9 @@ export interface GraphClientDeps {
   tokens: TokenProvider;
   logger: Logger;
   ids: IdGenerator;
-  /** Override for tests. */
+  /** Per-request timeout in ms (default 15s). Mostly here so tests can use a short one. */
+  requestTimeoutMs?: number;
+  /** Overrides for tests. */
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
 }
@@ -30,20 +32,27 @@ const RETRYABLE_STATUS = new Set([429, 503, 504]);
 const MAX_RETRIES = 3;
 const MAX_BACKOFF_MS = 8_000;
 const MAX_RETRY_AFTER_MS = 30_000;
+const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 
 export class GraphClient {
   private readonly fetchImpl: typeof fetch;
   private readonly sleep: (ms: number) => Promise<void>;
+  private readonly requestTimeoutMs: number;
 
   constructor(private readonly deps: GraphClientDeps) {
     this.fetchImpl = deps.fetchImpl ?? fetch;
     this.sleep = deps.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+    this.requestTimeoutMs = deps.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
   }
 
   /** `pathOrUrl` is either a path relative to the Graph base or a full URL (e.g. an `@odata.nextLink`). */
   async request<T>(method: string, pathOrUrl: string, opts: RequestOptions = {}): Promise<T> {
     const url = this.buildUrl(pathOrUrl, opts.query);
     const log = this.deps.logger.child({ traceId: opts.traceId, op: `${method} ${safePath(url)}` });
+    // A POST may have reached Graph even if we never saw the response — never auto-retry one
+    // on a transport-level failure (timeout / connection error / body read error). The caller
+    // can retry the tool call; the per-tool idempotency cache absorbs the duplicate.
+    const retrySafeOnTransportFailure = method.toUpperCase() !== "POST";
 
     for (let attempt = 0; ; attempt++) {
       const clientRequestId = this.deps.ids.uuid();
@@ -51,6 +60,7 @@ export class GraphClient {
       const startedAt = Date.now();
 
       let res: Response;
+      let bodyText: string;
       try {
         res = await this.fetchImpl(url, {
           method,
@@ -61,26 +71,33 @@ export class GraphClient {
             ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
           },
           body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+          signal: AbortSignal.timeout(this.requestTimeoutMs),
         });
+        bodyText = await res.text();
       } catch (err) {
-        if (attempt < MAX_RETRIES) {
+        const timedOut = err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError");
+        if (retrySafeOnTransportFailure && attempt < MAX_RETRIES) {
           const waitMs = this.backoffMs(attempt);
-          log.warn("network error, retrying", { clientRequestId, attempt, waitMs, outcome: "error" });
+          log.warn(timedOut ? "request timed out — retrying" : "transport error — retrying", { clientRequestId, attempt, waitMs, outcome: "error" });
           await this.sleep(waitMs);
           continue;
         }
-        throw new AppError("graph_unavailable", `Network error talking to Microsoft Graph: ${(err as Error).message}`, { clientRequestId });
+        throw new AppError(
+          "graph_unavailable",
+          timedOut
+            ? `Microsoft Graph did not respond within ${Math.round(this.requestTimeoutMs / 1000)}s.`
+            : `Network error talking to Microsoft Graph: ${(err as Error).message}`,
+          { clientRequestId },
+        );
       }
 
       const durationMs = Date.now() - startedAt;
 
       if (res.ok) {
         log.debug("graph ok", { clientRequestId, status: res.status, durationMs, outcome: "ok" });
-        if (res.status === 204) return undefined as T;
-        const text = await res.text();
-        if (!text) return undefined as T;
+        if (!bodyText) return undefined as T;
         try {
-          return JSON.parse(text) as T;
+          return JSON.parse(bodyText) as T;
         } catch {
           throw new AppError("graph_error", "Microsoft Graph returned a response that was not valid JSON.", { status: res.status, clientRequestId });
         }
@@ -88,16 +105,15 @@ export class GraphClient {
 
       let parsedBody: unknown;
       try {
-        parsedBody = await res.json();
+        parsedBody = bodyText ? JSON.parse(bodyText) : undefined;
       } catch {
         parsedBody = undefined;
       }
 
       if (RETRYABLE_STATUS.has(res.status) && attempt < MAX_RETRIES) {
+        // 429/503/504 mean the request was not processed — safe to retry even for a POST.
         const retryAfter = Number.parseInt(res.headers.get("retry-after") ?? "", 10);
-        // Honour Retry-After, but cap it — a tool call shouldn't block for minutes. If Graph
-        // wants longer than the cap we still only wait the cap, then (if it keeps failing)
-        // surface `rate_limited` with the server-suggested delay so the caller can retry later.
+        // Honour Retry-After, but cap it — a tool call shouldn't block for minutes.
         const waitMs = Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, MAX_RETRY_AFTER_MS) : this.backoffMs(attempt);
         log.warn("retryable graph error", { clientRequestId, status: res.status, attempt, waitMs, durationMs, outcome: "error" });
         await this.sleep(waitMs);
