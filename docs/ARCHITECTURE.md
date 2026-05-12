@@ -102,7 +102,7 @@ uninitialized ──init w/ cached account──▶ token_expired ──silent r
 
 ## 9. Security posture
 
-No client secret (public client). Token cache `0600`, refresh token treated like an SSH key. Minimal scopes (`Tasks.ReadWrite` — your own tasks, nothing else); `--readonly` is a UX/defense-in-depth runtime guard, `--scope-readonly` is the real boundary (`Tasks.Read` token). No telemetry. Token redaction in all logs/errors. Dependency minimalism: runtime deps are just `@modelcontextprotocol/sdk`, `@azure/msal-node`, `zod` (HTTP via native `fetch`, logging hand-rolled). `npm publish --provenance` from CI on tags (supply-chain attestation). Disclosure process: see [`../SECURITY.md`](../SECURITY.md).
+No client secret (public client). Token cache `0600`, refresh token treated like an SSH key. Minimal scopes (`Tasks.ReadWrite` — your own tasks, nothing else); `--readonly` is a UX/defense-in-depth runtime guard, `--scope-readonly` is the real boundary (`Tasks.Read` token). No telemetry. Token redaction in all logs/errors. Dependency minimalism: runtime deps are just `@modelcontextprotocol/sdk`, `@azure/msal-node`, `zod` (HTTP via native `fetch`, logging hand-rolled). Distributed from GitHub via `npx github:fabienbutz/mcp-microsoft-todo` (a `prepare` script builds `dist/` on install) — not published to the npm registry. Disclosure process: see [`../SECURITY.md`](../SECURITY.md).
 
 ## 10. Config & CLI
 
@@ -114,7 +114,7 @@ Env: `MS_TODO_CLIENT_ID`, `MS_TODO_AUTHORITY`, `MS_TODO_TOKEN_CACHE`, `MS_TODO_R
 
 ## 12. CI/CD & packaging
 
-`.github/workflows/ci.yml`: on push/PR → `npm ci → typecheck → lint → test → build` on Node 20 and 22. Build via `tsup` → ESM, shebang banner, single-file `dist/index.js`; `bin` → `mcp-microsoft-todo`; `files` allowlist limits the published tarball to `dist`, `docs`, `README`, `LICENSE`. **Planned:** a `release.yml` on `v*` tags doing `npm publish --provenance` (needs `id-token: write` + `NPM_TOKEN`), a generated `docs/TOOLS.md` with a CI drift check, and a `version.ts` ↔ `package.json` sync check.
+`.github/workflows/ci.yml`: on push/PR → `npm ci → typecheck → lint → test → build` on Node 20 and 22. Build via `tsup` → ESM, shebang banner, single-file `dist/index.js`; `bin` → `mcp-microsoft-todo`. A `prepare` script (`npm run build`) builds `dist/` on `npm install`, so `npx -y github:fabienbutz/mcp-microsoft-todo` runs the server straight from the repo — distribution is via GitHub, not the npm registry (the `files` allowlist in `package.json` is harmless but unused). **Planned:** a generated `docs/TOOLS.md` with a CI drift check; a `version.ts` ↔ `package.json` sync check.
 
 ## 13. Roadmap
 

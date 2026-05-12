@@ -1,6 +1,6 @@
 # Installing on Windows
 
-Until `mcp-microsoft-todo` is on the npm registry, there are two ways to run it. **Option A** needs only Node.js — `npx` runs the server straight from GitHub, no separate install. **Option B** keeps a local checkout of the repo. (On macOS/Linux it's the same — only the Claude Desktop config-file location differs; see the [README](../README.md).)
+The standard way to run `mcp-microsoft-todo` is via `npx` straight from this GitHub repo — no separate install, just Node.js (**Option A** below). **Option B** keeps a local checkout instead (handy if you want to hack on it or run offline). (On macOS/Linux it's the same — only the Claude Desktop config-file location differs; see the [README](../README.md).)
 
 ## Prerequisite (both options)
 
@@ -39,7 +39,7 @@ Until `mcp-microsoft-todo` is on the npm registry, there are two ways to run it.
 
 4. **Test** — ask Claude *"list my Microsoft To Do lists"* or *"add a task"*. (15 tools: task lists, tasks, checklist items.)
 
-> Running `login` (step 1) first matters: it warms the npx cache, so when Claude Desktop launches the server it starts in seconds instead of doing the slow first-time build. — `npx` from a GitHub URL roughly follows the repo's latest commit; for a guaranteed-reliable update story use Option B, or (better) once the package is on npm switch `github:fabienbutz/mcp-microsoft-todo` → `mcp-microsoft-todo`.
+> Running `login` (step 1) first matters: it warms the npx cache, so when Claude Desktop launches the server it starts in seconds instead of doing the slow first-time build. `npx` from a GitHub URL roughly follows the repo's latest commit; if you want a guaranteed-reliable update story (or to run offline), use Option B.
 
 ## Option B — build from source (local checkout)
 

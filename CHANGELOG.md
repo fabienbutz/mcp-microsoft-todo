@@ -4,8 +4,9 @@ Notable changes to this project. Format loosely based on [Keep a Changelog](http
 
 ## [Unreleased]
 
-Initial scaffold — **not yet published to npm**. Authenticates with the well-known
-Microsoft Graph CLI public client id by default (overridable via `MS_TODO_CLIENT_ID`).
+Initial scaffold. Distributed from GitHub — run with `npx -y github:fabienbutz/mcp-microsoft-todo`
+(a `prepare` script builds it on install); not published to the npm registry. Authenticates with
+the well-known Microsoft Graph CLI public client id by default (overridable via `MS_TODO_CLIENT_ID`).
 
 ### Added
 - Device-code authentication (MSAL public client — no client secret), file token cache at

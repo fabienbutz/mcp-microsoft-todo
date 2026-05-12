@@ -4,7 +4,7 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for **Microsoft To Do**, built on the Microsoft Graph API. Lets an MCP client (Claude Desktop, Claude Code, …) read and manage your To Do lists, tasks, and checklist items.
 
-> **Status — v0.1, unreleased.** Not yet on the npm registry — so for now write `github:fabienbutz/mcp-microsoft-todo` wherever the snippets below say `mcp-microsoft-todo` (e.g. `npx -y github:fabienbutz/mcp-microsoft-todo login`). `npx` runs it straight from the repo — no separate install (you do need Node.js; `npx` ships with it). Or [build from source](docs/INSTALL-WINDOWS.md). By default it authenticates with the well-known **Microsoft Graph CLI** public client id — nothing to register, just `login` once; set `MS_TODO_CLIENT_ID` to use [your own Entra app](docs/ENTRA-APP-SETUP.md).
+> **Install.** Runs via `npx` straight from this repo — no separate install, just Node.js (`npx` ships with it). This project is distributed from GitHub, not the npm registry, so the package spec is `github:fabienbutz/mcp-microsoft-todo` everywhere below. Prefer a local checkout? See [build from source](docs/INSTALL-WINDOWS.md). By default it authenticates with the well-known **Microsoft Graph CLI** public client id — nothing to register, just `login` once; set `MS_TODO_CLIENT_ID` to use [your own Entra app](docs/ENTRA-APP-SETUP.md).
 
 ## What it can access
 
@@ -22,23 +22,23 @@ By default the app identity shown on the Microsoft sign-in / consent screen is *
      "mcpServers": {
        "microsoft-todo": {
          "command": "npx",
-         "args": ["-y", "mcp-microsoft-todo"]
+         "args": ["-y", "github:fabienbutz/mcp-microsoft-todo"]
        }
      }
    }
    ```
-   To use your own Entra app, add `"env": { "MS_TODO_CLIENT_ID": "<your-app-client-id>" }`.
+   To use your own Entra app, add `"env": { "MS_TODO_CLIENT_ID": "<your-app-client-id>" }`. On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd", "args": ["/c", "npx", "-y", "github:fabienbutz/mcp-microsoft-todo"]`.
 
    Claude Code:
    ```bash
-   claude mcp add microsoft-todo -- npx -y mcp-microsoft-todo
+   claude mcp add microsoft-todo -- npx -y github:fabienbutz/mcp-microsoft-todo
    ```
 
 2. **Sign in once** (device-code flow):
    ```bash
-   npx -y mcp-microsoft-todo login
+   npx -y github:fabienbutz/mcp-microsoft-todo login
    ```
-   Open the URL it prints, enter the code, approve the consent. The token is cached; the server reuses it (and refreshes it silently).
+   Open the URL it prints, enter the code, approve the consent ("Microsoft Graph Command Line Tools"). The token is cached; the server reuses it (and refreshes it silently). *(Running this once also warms the npx cache, so Claude Desktop starts the server quickly afterward.)*
 
 3. **Restart your MCP client.** The `microsoft-todo` tools are now available.
 
