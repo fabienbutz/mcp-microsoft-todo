@@ -4,7 +4,7 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for **Microsoft To Do**, built on the Microsoft Graph API. Lets an MCP client (Claude Desktop, Claude Code, …) read and manage your To Do lists, tasks, and checklist items.
 
-> **Status — v0.1, unreleased.** Not yet on npm — until then, run from source: clone this repo, `npm install`, `npm run build`, then point your MCP client at `node /absolute/path/to/dist/index.js` (step-by-step: [Windows walkthrough](docs/INSTALL-WINDOWS.md)). The `npx` snippets below apply once it's published. By default it authenticates with the well-known **Microsoft Graph CLI** public client id — nothing to register, just `login` once; set `MS_TODO_CLIENT_ID` to use [your own Entra app](docs/ENTRA-APP-SETUP.md).
+> **Status — v0.1, unreleased.** Not yet on the npm registry — so for now write `github:fabienbutz/mcp-microsoft-todo` wherever the snippets below say `mcp-microsoft-todo` (e.g. `npx -y github:fabienbutz/mcp-microsoft-todo login`). `npx` runs it straight from the repo — no separate install (you do need Node.js; `npx` ships with it). Or [build from source](docs/INSTALL-WINDOWS.md). By default it authenticates with the well-known **Microsoft Graph CLI** public client id — nothing to register, just `login` once; set `MS_TODO_CLIENT_ID` to use [your own Entra app](docs/ENTRA-APP-SETUP.md).
 
 ## What it can access
 

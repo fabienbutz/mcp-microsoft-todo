@@ -1,74 +1,89 @@
 # Installing on Windows
 
-`mcp-microsoft-todo` isn't published to npm yet, so on Windows you build it from source once (~10 minutes), then point Claude Desktop at the built file. Once it's on npm this collapses to the `npx` flow in the [README](../README.md#quick-start).
+Until `mcp-microsoft-todo` is on the npm registry, there are two ways to run it. **Option A** needs only Node.js — `npx` runs the server straight from GitHub, no separate install. **Option B** keeps a local checkout of the repo. (On macOS/Linux it's the same — only the Claude Desktop config-file location differs; see the [README](../README.md).)
 
-## Prerequisites
+## Prerequisite (both options)
 
-Install these if you don't already have them:
+**Node.js** ≥ 20 (LTS) — <https://nodejs.org> → the green **LTS** button → run the installer (defaults are fine). **Open a fresh terminal afterwards** so `node`/`npx` are on your `PATH`. That's the only thing to install — `npx` (which runs the server) comes with Node.
 
-- **Node.js** ≥ 20 (LTS) — <https://nodejs.org> → the green **LTS** button → run the installer (defaults are fine). **Open a fresh terminal afterwards** so `node` is on your `PATH`.
-- **Git** — <https://git-scm.com/download/win> (defaults are fine). *(Optional — see "Without Git" in step 1.)*
+> If PowerShell refuses to run `npm`/`npx` with an execution-policy error, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once (confirm with `Y`), or use Command Prompt (`cmd`) instead.
 
-## 1. Get the code and build it
+## Option A — run via `npx`, no build (recommended)
 
-In PowerShell:
+1. **Sign in once** — in PowerShell or Command Prompt:
+   ```powershell
+   npx -y github:fabienbutz/mcp-microsoft-todo login
+   ```
+   The **first** run is slow (~30–60s — npx clones the repo, installs dependencies, builds it); after that it's cached. It then prints something like *"To sign in, use a web browser to open https://microsoft.com/devicelogin and enter the code ABCD-EFGH"*. Open that URL, sign in with your Microsoft account, enter the code, and approve the consent — it shows as **"Microsoft Graph Command Line Tools — Read and write your tasks"** (Microsoft's well-known tool client; the issued token is still limited to `Tasks.ReadWrite`). On success: *"Signed in as …"*. The token is cached at `C:\Users\<you>\.config\mcp-microsoft-todo\token-cache.json`.
 
-```powershell
-cd $HOME
-git clone https://github.com/fabienbutz/mcp-microsoft-todo.git
-cd mcp-microsoft-todo
-npm install
-npm run build
-```
+2. **Configure Claude Desktop** — edit `%APPDATA%\Claude\claude_desktop_config.json` (press Win+R, type `%APPDATA%\Claude`, open `claude_desktop_config.json` in a text editor; create the file/folder if missing). Add the `microsoft-todo` entry — **if there's already an `mcpServers` block, merge into it, don't replace it:**
+   ```json
+   {
+     "mcpServers": {
+       "microsoft-todo": {
+         "command": "npx",
+         "args": ["-y", "github:fabienbutz/mcp-microsoft-todo"]
+       }
+     }
+   }
+   ```
+   If Claude Desktop reports it can't start (`npx` not found — happens on some Windows setups), use this form instead:
+   ```json
+       "microsoft-todo": {
+         "command": "cmd",
+         "args": ["/c", "npx", "-y", "github:fabienbutz/mcp-microsoft-todo"]
+       }
+   ```
 
-**Without Git:** on the repo page, click the green **Code** button → **Download ZIP**, extract it to e.g. `C:\Users\<you>\mcp-microsoft-todo`, then in PowerShell `cd` into that folder and run `npm install` then `npm run build`.
+3. **Restart Claude Desktop** — fully quit it (right-click the tray icon → **Quit** — closing the window isn't enough) and reopen.
 
-This produces `dist\index.js`. Note the folder path — `pwd` prints it (e.g. `C:\Users\you\mcp-microsoft-todo`).
+4. **Test** — ask Claude *"list my Microsoft To Do lists"* or *"add a task"*. (15 tools: task lists, tasks, checklist items.)
 
-> If PowerShell refuses to run `npm` with an execution-policy error, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once (confirm with `Y`), or use Command Prompt (`cmd`) instead.
+> Running `login` (step 1) first matters: it warms the npx cache, so when Claude Desktop launches the server it starts in seconds instead of doing the slow first-time build. — `npx` from a GitHub URL roughly follows the repo's latest commit; for a guaranteed-reliable update story use Option B, or (better) once the package is on npm switch `github:fabienbutz/mcp-microsoft-todo` → `mcp-microsoft-todo`.
 
-## 2. Sign in
+## Option B — build from source (local checkout)
 
-```powershell
-node dist\index.js login
-```
+Predictable, faster startup, easy to update with `git pull`.
 
-It prints something like *"To sign in, use a web browser to open https://microsoft.com/devicelogin and enter the code ABCD-EFGH"*. Open that URL, sign in with your Microsoft account, enter the code, and approve the consent — it appears as **"Microsoft Graph Command Line Tools — Read and write your tasks"** (that's Microsoft's well-known tool client; the issued token is still limited to `Tasks.ReadWrite`). On success you'll see *"Signed in as …"*. The token is cached at `C:\Users\<you>\.config\mcp-microsoft-todo\token-cache.json` — you only do this once.
+1. **Get the code and build** — in PowerShell:
+   ```powershell
+   cd $HOME
+   git clone https://github.com/fabienbutz/mcp-microsoft-todo.git
+   cd mcp-microsoft-todo
+   npm install
+   npm run build
+   ```
+   This produces `dist\index.js`. Note the folder path — `pwd` prints it (e.g. `C:\Users\you\mcp-microsoft-todo`). *(Needs [Git](https://git-scm.com/download/win) for `git clone`; or download the ZIP from the repo's green **Code** button and extract it.)*
 
-To use your own Entra app instead of the default client, see [`ENTRA-APP-SETUP.md`](ENTRA-APP-SETUP.md) and set `MS_TODO_CLIENT_ID` (in the `env` block of the config below, and as an env var when you run `login`).
+2. **Sign in once**:
+   ```powershell
+   node dist\index.js login
+   ```
+   (Same device-code flow as Option A step 1.)
 
-## 3. Configure Claude Desktop
+3. **Configure Claude Desktop** — same config file as above, pointing at the built file:
+   ```json
+   {
+     "mcpServers": {
+       "microsoft-todo": {
+         "command": "node",
+         "args": ["C:/Users/you/mcp-microsoft-todo/dist/index.js"]
+       }
+     }
+   }
+   ```
+   Replace the path with yours. **Use forward slashes (`/`)** — backslashes are escape characters in JSON. If `node` can't be found, use the full path to `node.exe` (`where.exe node` shows it, e.g. `C:/Program Files/nodejs/node.exe`).
 
-Edit `%APPDATA%\Claude\claude_desktop_config.json` — press <kbd>Win</kbd>+<kbd>R</kbd>, type `%APPDATA%\Claude`, press Enter, and open `claude_desktop_config.json` in a text editor (create the file/folder if it's missing). Add the `microsoft-todo` entry — **if there's already an `mcpServers` block, merge into it, don't replace it:**
+4. **Restart Claude Desktop**, then test (as in Option A step 4).
 
-```json
-{
-  "mcpServers": {
-    "microsoft-todo": {
-      "command": "node",
-      "args": ["C:/Users/you/mcp-microsoft-todo/dist/index.js"]
-    }
-  }
-}
-```
+> Update later: in the folder run `git pull`, then `npm install`, then `npm run build`, then restart Claude Desktop.
 
-- Replace the path with yours from step 1.
-- **Use forward slashes (`/`)** in the path — backslashes are escape characters in JSON.
-- If Claude Desktop reports `node` can't be found, replace `"node"` with the full path to `node.exe`, e.g. `"C:/Program Files/nodejs/node.exe"` (`where.exe node` shows it).
+## Using your own Entra app
 
-Save the file.
-
-## 4. Restart Claude Desktop
-
-Fully quit it (right-click the tray icon → **Quit** — closing the window isn't enough) and reopen. Config changes only take effect on a restart.
-
-## 5. Test
-
-Ask Claude: *"list my Microsoft To Do lists"* or *"add a task"*. You should see the `microsoft-todo` tools being used (15 of them — task lists, tasks, checklist items).
+By default this uses Microsoft's well-known Graph CLI public client (no registration needed). To use your own app registration instead, see [`ENTRA-APP-SETUP.md`](ENTRA-APP-SETUP.md) and set `MS_TODO_CLIENT_ID` — in the config's `env` block (`"env": { "MS_TODO_CLIENT_ID": "<id>" }`) and as an env var when you run `login`.
 
 ## Troubleshooting
 
-- **`node is not recognized`** — Node isn't installed, or the terminal predates the install → reinstall Node (LTS) and open a fresh terminal.
-- **Tools missing / Claude Desktop reports the server as failed** — almost always a path typo in the config. Check that `C:\Users\…\mcp-microsoft-todo\dist\index.js` actually exists, and that the JSON path uses forward slashes. If `node` can't be found, use the full path to `node.exe`.
-- **Logs** — `%APPDATA%\Claude\logs\mcp-server-microsoft-todo.log` (or under `%LOCALAPPDATA%\Claude\logs\`).
-- **Updating later** — `git pull` in the folder, then `npm install`, then `npm run build`, then restart Claude Desktop.
+- **`node`/`npx` is not recognized** — Node isn't installed, or the terminal predates the install → reinstall Node (LTS), open a fresh terminal.
+- **Claude Desktop shows the server as failed** — Option A: try the `cmd /c npx` form. Option B: check the path in the config (forward slashes? does `dist\index.js` exist?). Logs: `%APPDATA%\Claude\logs\mcp-server-microsoft-todo.log` (or `%LOCALAPPDATA%\Claude\logs\`).
+- **First Claude Desktop launch times out (Option A)** — the cold `npx github:` run builds the package and can be slow → run `npx -y github:fabienbutz/mcp-microsoft-todo login` in a terminal first to warm the cache, then restart Claude Desktop.
