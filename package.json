@@ -45,17 +45,17 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@azure/msal-node": "^2.16.0",
+    "@azure/msal-node": "^5.2.1",
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
-    "eslint": "^9.17.0",
-    "fast-check": "^3.23.0",
+    "@types/node": "^25.7.0",
+    "eslint": "^10.3.0",
+    "fast-check": "^4.8.0",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.18.0",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.6"
   }
 }
