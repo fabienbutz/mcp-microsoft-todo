@@ -1,0 +1,61 @@
+{
+  "name": "mcp-microsoft-todo",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Microsoft To Do (via Microsoft Graph).",
+  "type": "module",
+  "license": "MIT",
+  "author": "Fabien Butz",
+  "homepage": "https://github.com/fabienbutz/mcp-microsoft-todo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabienbutz/mcp-microsoft-todo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fabienbutz/mcp-microsoft-todo/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "microsoft-todo",
+    "microsoft-graph",
+    "todo",
+    "tasks",
+    "claude",
+    "anthropic"
+  ],
+  "bin": {
+    "mcp-microsoft-todo": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^2.16.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "eslint": "^9.17.0",
+    "fast-check": "^3.23.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^2.1.8"
+  }
+}
